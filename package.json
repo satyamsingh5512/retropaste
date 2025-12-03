@@ -1,0 +1,55 @@
+{
+  "name": "retropaste",
+  "version": "1.0.0",
+  "description": "Terminal-themed pastebin with AI-powered code analysis and retro aesthetics",
+  "author": "RetroPaste Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/retropaste.git"
+  },
+  "keywords": [
+    "pastebin",
+    "code-sharing",
+    "terminal",
+    "retro",
+    "ai-analysis",
+    "nextjs",
+    "typescript",
+    "mongodb"
+  ],
+  "private": false,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "setup": "echo '\n🚀 RetroPaste Setup\n\n⚠️  IMPORTANT: You need MongoDB running!\n\nQuick setup options:\n1. MongoDB Atlas (free): https://www.mongodb.com/cloud/atlas\n2. Docker: docker run -d -p 27017:27017 mongo\n\nSee SETUP.md for detailed instructions.\n'"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@monaco-editor/react": "^4.7.0",
+    "bcryptjs": "^3.0.3",
+    "framer-motion": "^12.23.25",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^9.0.0",
+    "nanoid": "^5.1.6",
+    "next": "16.0.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-hook-form": "^7.67.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.6",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
