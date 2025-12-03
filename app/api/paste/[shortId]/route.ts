@@ -11,7 +11,7 @@ export async function GET(
     await connectDB();
     const { shortId } = await params;
 
-    const paste = await Paste.findOne({ shortId });
+    const paste = await Paste.findOne({ shortId }).populate('userId', 'username');
 
     if (!paste) {
       return NextResponse.json(
@@ -62,6 +62,7 @@ export async function GET(
       viewsRemaining,
       timeRemaining,
       aiAnalysis: paste.aiAnalysis,
+      author: paste.userId ? (paste.userId as any).username : 'Anonymous',
     });
 
   } catch (error) {

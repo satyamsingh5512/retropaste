@@ -16,6 +16,7 @@ interface PasteData {
   viewCount: number;
   viewsRemaining: number | null;
   timeRemaining: string;
+  author?: string;
   aiAnalysis?: {
     vulnerabilities: Array<{
       type: string;
@@ -134,6 +135,11 @@ export default function PasteViewPage() {
           </Link>
 
           <div className="flex items-center gap-4 text-sm">
+            {paste?.author && (
+              <span className="text-terminal">
+                👤 {paste.author}
+              </span>
+            )}
             <span className="text-terminal-dim">
               Views: {paste?.viewCount}
               {paste?.viewsRemaining && ` / ${paste.viewsRemaining} left`}
