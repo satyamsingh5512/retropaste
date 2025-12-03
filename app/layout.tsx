@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="crt-effect">
+    <html lang="en" className="bg-black">
+      <body className="crt-effect min-h-screen">
         {children}
       </body>
     </html>

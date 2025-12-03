@@ -6,9 +6,16 @@ export function useRetroSound() {
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const getAudioContext = useCallback(() => {
+    if (typeof window === 'undefined') return null;
+    
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
+      try {
+        audioContextRef.current = new (window.AudioContext ||
+          (window as any).webkitAudioContext)();
+      } catch (error) {
+        console.warn('Audio context not available');
+        return null;
+      }
     }
     return audioContextRef.current;
   }, []);
@@ -16,6 +23,8 @@ export function useRetroSound() {
   const playClick = useCallback(() => {
     try {
       const ctx = getAudioContext();
+      if (!ctx) return;
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -41,6 +50,8 @@ export function useRetroSound() {
   const playHover = useCallback(() => {
     try {
       const ctx = getAudioContext();
+      if (!ctx) return;
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -66,6 +77,8 @@ export function useRetroSound() {
   const playSuccess = useCallback(() => {
     try {
       const ctx = getAudioContext();
+      if (!ctx) return;
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 
@@ -93,6 +106,8 @@ export function useRetroSound() {
   const playError = useCallback(() => {
     try {
       const ctx = getAudioContext();
+      if (!ctx) return;
+      
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
 

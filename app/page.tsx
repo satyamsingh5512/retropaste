@@ -8,12 +8,16 @@ import RetroLoader from "@/components/RetroLoader";
 import { useRetroSound } from "@/hooks/useRetroSound";
 
 export default function HomePage() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Changed to false
   const [bootComplete, setBootComplete] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("login");
-  const { playClick, playHover } = useRetroSound();
+  
+  // Safely initialize sound hooks
+  const soundHooks = useRetroSound();
+  const playClick = soundHooks?.playClick || (() => {});
+  const playHover = soundHooks?.playHover || (() => {});
 
   const bootSequence = [
     "> BIOS INITIALIZED...",
@@ -24,29 +28,16 @@ export default function HomePage() {
   ];
 
   useEffect(() => {
-    // Show loader for 2 seconds
-    const loaderTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(loaderTimer);
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading && currentLine < bootSequence.length) {
+    if (currentLine < bootSequence.length) {
       const timer = setTimeout(() => {
         setCurrentLine(currentLine + 1);
       }, 300);
       return () => clearTimeout(timer);
-    } else if (!isLoading && currentLine >= bootSequence.length) {
+    } else if (currentLine >= bootSequence.length) {
       const timer = setTimeout(() => setBootComplete(true), 500);
       return () => clearTimeout(timer);
     }
-  }, [currentLine, bootSequence.length, isLoading]);
-
-  if (isLoading) {
-    return <RetroLoader />;
-  }
+  }, [currentLine, bootSequence.length]);
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
