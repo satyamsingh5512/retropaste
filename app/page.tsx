@@ -188,7 +188,7 @@ export default function HomePage() {
 
                 <Link href="/docs">
                   <motion.button
-                    className="px-8 py-4 text-lg border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all retro-button"
+                    className="btn-terminal px-8 py-4 text-lg retro-button"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={playClick}
