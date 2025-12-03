@@ -588,3 +588,44 @@ body {
     0 0 20px var(--terminal-glow),
     0 0 30px var(--terminal-glow);
 }
+
+/* Chat animations */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Scrollbar styling for chat */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 8px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: var(--bg-black);
+  border-left: 1px solid var(--border-dim);
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: var(--terminal-dim);
+  border-radius: 4px;
+}
+
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: var(--terminal);
+}

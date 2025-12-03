@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import Editor from "@monaco-editor/react";
 import PermissionsModal from "@/components/PermissionsModal";
+import LiveChat from "@/components/LiveChat";
 
 interface PasteData {
   shortId: string;
@@ -524,6 +525,14 @@ export default function PasteViewPage() {
           } : null);
         }}
       />
+
+      {/* Live Chat */}
+      {paste && (
+        <LiveChat 
+          pasteContent={paste.content} 
+          language={paste.language} 
+        />
+      )}
     </div>
   );
 }
