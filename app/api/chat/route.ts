@@ -12,32 +12,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build context for AI
-    const systemPrompt = `You are a helpful AI code assistant. You're analyzing ${language} code and helping users understand it.
-
-Code being analyzed:
-\`\`\`${language}
-${code.substring(0, 2000)}${code.length > 2000 ? '\n... (truncated)' : ''}
-\`\`\`
-
-Provide clear, concise, and helpful responses. Use technical language when appropriate but explain complex concepts. Format code snippets with backticks.`;
-
-    // Build conversation history
-    const conversationHistory = history?.map((msg: any) => ({
-      role: msg.role,
-      content: msg.content,
-    })) || [];
-
-    // Call OpenAI API (or any other AI service)
-    // For now, we'll use a simple mock response
-    // In production, you'd integrate with OpenAI, Anthropic, etc.
+    // Limit code context to reduce processing time
+    const codeContext = code.substring(0, 1000);
     
-    const response = await generateAIResponse(message, code, language, conversationHistory);
+    // Limit history to last 3 messages only
+    const recentHistory = history?.slice(-3) || [];
+    
+    // Generate response with optimized context
+    const response = await generateAIResponse(message, codeContext, language, recentHistory);
 
-    return NextResponse.json({
+    const apiResponse = NextResponse.json({
       success: true,
       response,
     });
+
+    // Cache common questions for 5 minutes
+    apiResponse.headers.set('Cache-Control', 'public, s-maxage=300');
+    
+    return apiResponse;
 
   } catch (error) {
     console.error('Chat error:', error);

@@ -26,13 +26,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique short ID
+    // Generate unique short ID with retry limit to avoid infinite loops
     let shortId = generateShortId();
-    let exists = await Paste.findOne({ shortId });
+    let exists = await Paste.findOne({ shortId }).select('_id').lean();
+    let retries = 0;
+    const MAX_RETRIES = 5;
     
-    while (exists) {
+    while (exists && retries < MAX_RETRIES) {
       shortId = generateShortId();
-      exists = await Paste.findOne({ shortId });
+      exists = await Paste.findOne({ shortId }).select('_id').lean();
+      retries++;
+    }
+    
+    if (retries >= MAX_RETRIES) {
+      return NextResponse.json(
+        { error: 'Failed to generate unique ID, please try again' },
+        { status: 500 }
+      );
     }
 
     // Detect language if not provided

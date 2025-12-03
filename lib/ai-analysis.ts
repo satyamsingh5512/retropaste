@@ -24,18 +24,19 @@ export async function analyzeCode(
   code: string,
   language: string
 ): Promise<AnalysisResult> {
-  // Simulate AI processing delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Reduced delay for faster response
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   const vulnerabilities: Vulnerability[] = [];
   const suggestions: Suggestion[] = [];
   let performanceScore = 85;
 
-  // Basic pattern matching for common issues
-  const lines = code.split('\n');
+  // Limit code analysis to first 5000 characters for performance
+  const limitedCode = code.substring(0, 5000);
+  const lines = limitedCode.split('\n');
 
   // Check for SQL injection vulnerabilities
-  if (code.includes('SELECT') && code.includes('+')) {
+  if (limitedCode.includes('SELECT') && limitedCode.includes('+')) {
     vulnerabilities.push({
       type: 'SQL Injection',
       severity: 'critical',
@@ -46,7 +47,7 @@ export async function analyzeCode(
   }
 
   // Check for eval usage
-  if (code.includes('eval(')) {
+  if (limitedCode.includes('eval(')) {
     vulnerabilities.push({
       type: 'Code Injection',
       severity: 'critical',
@@ -57,7 +58,7 @@ export async function analyzeCode(
   }
 
   // Check for console.log in production
-  if (code.includes('console.log')) {
+  if (limitedCode.includes('console.log')) {
     suggestions.push({
       category: 'Best Practices',
       improvement: 'Remove console.log statements before production',
@@ -67,7 +68,8 @@ export async function analyzeCode(
   }
 
   // Check for inefficient loops
-  if (code.includes('for') && code.includes('for')) {
+  const forCount = (limitedCode.match(/\bfor\b/g) || []).length;
+  if (forCount >= 2) {
     suggestions.push({
       category: 'Performance',
       improvement: 'Nested loops detected. Consider optimizing with better data structures',
@@ -77,7 +79,7 @@ export async function analyzeCode(
   }
 
   // Check for missing error handling
-  if ((code.includes('fetch') || code.includes('axios')) && !code.includes('catch')) {
+  if ((limitedCode.includes('fetch') || limitedCode.includes('axios')) && !limitedCode.includes('catch')) {
     suggestions.push({
       category: 'Error Handling',
       improvement: 'Add error handling for async operations',
@@ -86,11 +88,11 @@ export async function analyzeCode(
     performanceScore -= 10;
   }
 
-  // Check for hardcoded credentials
+  // Check for hardcoded credentials (optimized with single pass)
   const credentialPatterns = ['password', 'api_key', 'secret', 'token'];
-  credentialPatterns.forEach(pattern => {
+  for (const pattern of credentialPatterns) {
     const regex = new RegExp(`${pattern}\\s*=\\s*['"][^'"]+['"]`, 'i');
-    if (regex.test(code)) {
+    if (regex.test(limitedCode)) {
       vulnerabilities.push({
         type: 'Hardcoded Credentials',
         severity: 'high',
@@ -98,13 +100,14 @@ export async function analyzeCode(
         fix: 'Use environment variables for sensitive data',
       });
       performanceScore -= 15;
+      break; // Only report once
     }
-  });
+  }
 
   // Language-specific checks
   if (language === 'javascript' || language === 'typescript') {
     // Check for var usage
-    if (code.includes('var ')) {
+    if (limitedCode.includes('var ')) {
       suggestions.push({
         category: 'Modern Syntax',
         improvement: 'Use const or let instead of var',
@@ -114,7 +117,7 @@ export async function analyzeCode(
     }
 
     // Check for == instead of ===
-    if (code.includes('==') && !code.includes('===')) {
+    if (limitedCode.includes('==') && !limitedCode.includes('===')) {
       suggestions.push({
         category: 'Best Practices',
         improvement: 'Use strict equality (===) instead of loose equality (==)',
@@ -126,7 +129,7 @@ export async function analyzeCode(
 
   if (language === 'python') {
     // Check for bare except
-    if (code.includes('except:')) {
+    if (limitedCode.includes('except:')) {
       suggestions.push({
         category: 'Error Handling',
         improvement: 'Specify exception types instead of bare except',

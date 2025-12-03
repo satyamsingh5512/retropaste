@@ -51,7 +51,7 @@ export async function GET(
       ? formatTimeRemaining(paste.expiresAt) 
       : 'Never';
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       shortId: paste.shortId,
       content: paste.content,
       language: paste.language,
@@ -66,6 +66,11 @@ export async function GET(
       permissions: paste.permissions || { mode: 'view-only' },
       collaborators: paste.collaborators || [],
     });
+
+    // Add caching headers for better performance
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+    
+    return response;
 
   } catch (error) {
     console.error('Error fetching paste:', error);

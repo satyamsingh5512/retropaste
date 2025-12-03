@@ -59,7 +59,10 @@ export default function PasteViewPage() {
   useEffect(() => {
     const fetchPaste = async () => {
     try {
-      const response = await fetch(`/api/paste/${params.shortId}`);
+      const response = await fetch(`/api/paste/${params.shortId}`, {
+        // Add caching headers
+        next: { revalidate: 60 } // Cache for 60 seconds
+      });
       const data = await response.json();
 
       if (response.ok) {
@@ -75,6 +78,13 @@ export default function PasteViewPage() {
     };
 
     fetchPaste();
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, [params.shortId]);
 
   const handleCopy = async () => {
@@ -149,26 +159,30 @@ export default function PasteViewPage() {
     if (value !== undefined) {
       setEditedContent(value);
       
-      // Auto-save for edit-together mode
+      // Auto-save for edit-together mode with debouncing
       if (paste?.permissions?.mode === 'edit-together') {
         if (saveTimeoutRef.current) {
           clearTimeout(saveTimeoutRef.current);
         }
+        // Increased debounce to 2 seconds to reduce API calls
         saveTimeoutRef.current = setTimeout(async () => {
-          try {
-            await fetch(`/api/paste/${params.shortId}/update`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                content: value,
-                userId: "anonymous",
-                username: "Anonymous"
-              }),
-            });
-          } catch (err) {
-            console.error("Auto-save failed:", err);
+          // Only save if content actually changed
+          if (value !== paste?.content) {
+            try {
+              await fetch(`/api/paste/${params.shortId}/update`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                  content: value,
+                  userId: "anonymous",
+                  username: "Anonymous"
+                }),
+              });
+            } catch (err) {
+              console.error("Auto-save failed:", err);
+            }
           }
-        }, 1000);
+        }, 2000);
       }
     }
   };
