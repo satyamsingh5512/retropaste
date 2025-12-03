@@ -7,6 +7,9 @@ import Link from "next/link";
 import Editor from "@monaco-editor/react";
 import PermissionsModal from "@/components/PermissionsModal";
 import LiveChat from "@/components/LiveChat";
+import CodePlayground from "@/components/CodePlayground";
+import QRCodeModal from "@/components/QRCodeModal";
+import GistModal from "@/components/GistModal";
 
 interface PasteData {
   shortId: string;
@@ -54,6 +57,8 @@ export default function PasteViewPage() {
   const [editedContent, setEditedContent] = useState("");
   const [showPermissions, setShowPermissions] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showQRCode, setShowQRCode] = useState(false);
+  const [showGist, setShowGist] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -310,6 +315,20 @@ export default function PasteViewPage() {
                     </button>
                   )}
                   <button
+                    onClick={() => setShowQRCode(true)}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                    title="Generate QR Code"
+                  >
+                    [QR]
+                  </button>
+                  <button
+                    onClick={() => setShowGist(true)}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                    title="GitHub Gist"
+                  >
+                    [GIST]
+                  </button>
+                  <button
                     onClick={() => router.push("/paste/new")}
                     className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
                   >
@@ -344,6 +363,11 @@ export default function PasteViewPage() {
               )}
             </div>
           </motion.div>
+
+          {/* Code Playground */}
+          {paste && !isEditing && (
+            <CodePlayground code={paste.content} language={paste.language} />
+          )}
 
           {/* Code Display */}
           <motion.div
@@ -545,6 +569,23 @@ export default function PasteViewPage() {
         <LiveChat 
           pasteContent={paste.content} 
           language={paste.language} 
+        />
+      )}
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        isOpen={showQRCode}
+        onClose={() => setShowQRCode(false)}
+        url={typeof window !== 'undefined' ? window.location.href : ''}
+      />
+
+      {/* GitHub Gist Modal */}
+      {paste && (
+        <GistModal
+          isOpen={showGist}
+          onClose={() => setShowGist(false)}
+          code={paste.content}
+          language={paste.language}
         />
       )}
     </div>
