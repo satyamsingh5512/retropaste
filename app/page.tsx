@@ -296,11 +296,28 @@ function fibonacci(n) {
       {/* Footer */}
       <footer className="border-t-2 border-border-dim py-8 mt-32">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-terminal-dim text-sm">
-            &gt; BUILT WITH 💚 FOR THE TERMINAL LOVERS
+          <p className="text-terminal-dim text-sm mb-2">
+            Made with ❤️ by{" "}
+            <a
+              href="https://github.com/satyamsingh5512"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-terminal hover:text-retro transition-all terminal-glow"
+            >
+              Satym
+            </a>
           </p>
-          <p className="text-terminal-dim text-xs mt-2">
-            © 2024 RetroPaste. Open Source. MIT License.
+          <p className="text-terminal-dim text-xs">
+            © 2025 RetroPaste •{" "}
+            <a
+              href="https://github.com/satyamsingh5512/retropaste"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-terminal-dim hover:text-terminal transition-all"
+            >
+              Open Source
+            </a>
+            {" "}• MIT License
           </p>
         </div>
       </footer>
