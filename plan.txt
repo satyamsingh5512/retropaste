@@ -1,0 +1,769 @@
+1. High-level Concept
+
+Name: CodeMentor AI
+Category: Frankenstein (primary) + Costume Contest (bonus)
+
+One-liner:
+An AI-powered peer code review and mentoring platform that merges competitive programming style problems with real-time collaborative coding, AI steering, and a spooky Halloween-themed interface.
+
+Core value:
+
+Helps students and competitive programmers get actionable feedback, not just “Wrong answer”.
+
+Enables live collaboration with friends or mentors.
+
+Uses AI as a mentor, not just a code autocompleter.
+
+2. Target Users and Roles
+Roles
+
+Learner (default user)
+
+Solves problems
+
+Requests AI review
+
+Collaborates with peers
+
+Gains reputation and badges
+
+Mentor
+
+Reviews others' code
+
+Gets higher XP and special badges
+
+Can leave structured feedback
+
+Admin (optional for hackathon)
+
+Manages problems
+
+Moderate reports
+
+For the hackathon, you can technically merge Learner and Mentor but keep the concept of “mentor streaks” based on who gives good feedback.
+
+3. Tech Stack
+Frontend
+
+Framework: Next.js 14 (App Router, TypeScript)
+
+UI: React, Tailwind CSS, shadcn/ui
+
+Animations: Framer Motion
+
+Code Editor: Monaco Editor or CodeMirror 6
+
+State Management: React Query or simple useState/useEffect for MVP
+
+Realtime Collab: Socket.IO client or native WebSocket client
+
+Backend
+
+Runtime: Next.js API routes or a separate Node.js Express server
+
+Language: TypeScript
+
+Realtime: Socket.IO server or WebSocket server
+
+AI Integration: Kiro agent hooks, plus standard LLM API if needed
+
+Auth: NextAuth.js (GitHub, Google or simple email/password)
+
+Database
+
+DB: PostgreSQL (Neon, Supabase, Railway) or MongoDB Atlas
+
+ORM: Prisma (if Postgres) or Mongoose (if Mongo)
+
+Let’s pick PostgreSQL + Prisma (clean schemas, easy relations).
+
+DevOps / Infra
+
+Hosting frontend + backend: Vercel (ideal for Next.js)
+
+DB hosting: Neon or Supabase
+
+Socket server:
+
+Option A: Inside Next.js (Edge/runtime)
+
+Option B: Tiny Node server on Railway/Render (clean separation)
+
+Other
+
+Design system: shadcn/ui + Tailwind tokens
+
+Video demo recording: OBS + browser
+
+Repository: GitHub (public, MIT or Apache 2.0 license)
+
+4. Feature Set
+A. MVP Features (Must have)
+
+Authentication
+
+Sign up / login with email or Google
+
+Basic profile: username, avatar, role (Learner/Mentor)
+
+Problem Browser
+
+List of problems with:
+
+Title, difficulty, tags, source (CodeChef style)
+
+Filter by difficulty or tag
+
+For hackathon, store problems locally in DB. Mention MCP integration as planned.
+
+Problem Detail Page
+
+Problem statement
+
+Input / output format
+
+Sample test cases
+
+Code Editor + Language Selection
+
+Monaco Editor (JS/TS, Python at minimum)
+
+Choose language (dropdown)
+
+Run code against sample test cases (client side or simple backend runner)
+
+Submit for AI Review
+
+On clicking “Get AI Mentor Review”:
+
+Code, problem, and language sent to AI
+
+AI returns:
+
+Summary of what code is doing
+
+Possible bugs
+
+Suggestions for edge cases
+
+Complexity analysis
+
+Next steps to improve
+
+AI Feedback Panel
+
+Beautiful panel that shows:
+
+Overall rating (1 to 5 ghosts)
+
+Sections: Readability, Efficiency, Correctness, Edge cases
+
+Recommended learning resources (textual)
+
+Basic Gamification
+
+XP points per:
+
+Problem solved
+
+AI-reviewed submission
+
+Peer giving feedback (if you implement manual reviews)
+
+Show:
+
+Level
+
+Badge or title: “Haunted Debugger”, “Code Whisperer”
+
+Spooky Theme
+
+Global Halloween dark theme
+
+Ghost cursors in collab editor (even if collab is basic)
+
+Spooky transitions on feedback
+
+B. Extended Features (Nice-to-have, if time allows)
+
+Real-time Collaborative Editing
+
+Invite link: share a room link
+
+Both users editing same code (Socket.IO sync)
+
+Ghost cursor with their avatar/ghost icon
+
+Comment Threads on Code
+
+Select code line → add comment
+
+Appears as a floating spooky speech bubble
+
+Mentor Mode
+
+Mentor dashboard:
+
+See list of mentees’ submissions
+
+Provide manual feedback
+
+Earn mentor XP
+
+Problem Source Integration (MCP, conceptual)
+
+Create an MCP tool to fetch problems metadata from a CP API
+
+For hackathon you can:
+
+Implement a mock or a limited real integration
+
+Explain it clearly in write-up
+
+5. System Architecture
+High-level Flow
+
+User logs in → goes to dashboard
+
+Selects a problem → lands on Problem Detail + Editor
+
+Writes code → presses “Run” or “Get AI Review”
+
+Backend sends code + problem context to Kiro AI Judge agent
+
+AI Judge returns structured feedback
+
+Feedback stored in DB and displayed in spooky feedback panel
+
+XP, streaks and badges updated.
+
+Frontend Pages
+
+/
+Landing page with spooky hero section and CTA: “Summon your Code Mentor”
+
+/auth/login, /auth/register
+
+/dashboard
+
+Recent submissions
+
+Suggested problems
+
+XP, level, badges
+
+/problems
+
+Problem list, filters
+
+/problems/[id]
+
+Problem statement
+
+Editor
+
+AI feedback area
+
+For collab: “Invite a friend”
+
+/profile/[username]
+
+Stats, solved problems, XP, badges
+
+Optional:
+
+/mentors page for listing mentors
+
+Backend Modules
+
+Auth module
+
+Problems module
+
+Submissions module
+
+Feedback module
+
+Gamification module
+
+Collaboration module (websockets)
+
+AI module (integrates Kiro agent hooks)
+
+6. Database Schema (Postgres + Prisma style)
+// User
+model User {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  image       String?  // avatar
+  role        String   // "learner" | "mentor" | "admin"
+  xp          Int      @default(0)
+  level       Int      @default(1)
+  streakDays  Int      @default(0)
+  badges      BadgeOnUser[]
+  submissions Submission[]
+  createdAt   DateTime @default(now())
+}
+
+// Badge
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique  // "HAUNTED_DEBUGGER"
+  description String
+  icon        String
+  users       BadgeOnUser[]
+}
+
+// Many to many user-badges
+model BadgeOnUser {
+  userId  String
+  badgeId String
+  earnedAt DateTime @default(now())
+
+  user   User  @relation(fields: [userId], references: [id])
+  badge  Badge @relation(fields: [badgeId], references: [id])
+
+  @@id([userId, badgeId])
+}
+
+// Problem
+model Problem {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  difficulty  String   // "easy" | "medium" | "hard"
+  tags        String   // comma separated or JSON
+  source      String   // "internal" | "codechef" | etc.
+  statement   String
+  inputFormat String
+  outputFormat String
+  samples     Json
+  createdAt   DateTime @default(now())
+}
+
+// Submission
+model Submission {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  problem     Problem  @relation(fields: [problemId], references: [id])
+  problemId   String
+  language    String   // "cpp", "python", etc.
+  code        String
+  status      String   // "pending" | "reviewed" | "error"
+  aiFeedback  AIFeedback?
+  createdAt   DateTime @default(now())
+}
+
+// AI Feedback
+model AIFeedback {
+  id             String   @id @default(cuid())
+  submission     Submission @relation(fields: [submissionId], references: [id])
+  submissionId   String
+  summary        String
+  readability    Int
+  efficiency     Int
+  correctness    Int
+  edgeCases      Int
+  overallScore   Int
+  suggestions    Json     // list of suggestions
+  learningLinks  Json     // optional
+  createdAt      DateTime @default(now())
+}
+
+7. API Endpoints (Example)
+
+You can implement these as Next.js API routes:
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+GET /api/problems
+
+GET /api/problems/[id]
+
+POST /api/submissions
+
+Body: problemId, code, language
+
+Creates submission, optionally runs basic tests
+
+POST /api/submissions/[id]/review
+
+Triggers a Kiro AI judge call via hook
+
+Saves feedback in AIFeedback
+
+GET /api/user/me
+
+GET /api/user/stats
+
+For real-time collab:
+
+WebSocket or Socket.IO endpoint like /api/socket
+
+Events: join_room, code_change, cursor_move, disconnect
+
+8. Kiro Integration: /.kiro Directory
+
+Your repo must have this at root:
+
+/.kiro/
+  specs/
+    project.md
+    platform.md
+    judge.md
+    collaboration.md
+  steering/
+    ai-judge.md
+    ui-guidelines.md
+    user-experience.md
+  hooks/
+    auto-feedback.js
+    collab-sync.js
+  mcp/
+    problems-tool.json  (or .md)
+
+8.1 Specs
+
+/.kiro/specs/project.md
+
+Overall system description
+
+Tech stack
+
+Modules
+
+User roles
+
+Non-functional requirements
+
+/.kiro/specs/platform.md
+
+Detailed behavior of:
+
+Dashboard
+
+Problem browser
+
+Submission flow
+
+Gamification rules
+
+/.kiro/specs/judge.md
+
+Format of AI input:
+
+problem description
+
+user code
+
+language
+
+test results
+
+Format of AI output:
+
+summary
+
+scores
+
+suggestions
+
+/.kiro/specs/collaboration.md
+
+Room structure
+
+Events and payloads
+
+Role of each participant
+
+8.2 Steering Docs
+
+/.kiro/steering/ai-judge.md
+
+Tell Kiro:
+
+Act like a friendly human mentor, not a harsh judge
+
+Always encourage, never insult
+
+Focus on:
+
+conceptual understanding
+
+bug patterns
+
+time and space complexity
+
+edge cases
+
+/.kiro/steering/ui-guidelines.md
+
+Define:
+
+Halloween color palette
+
+Use of ghosts, spider webs, glows
+
+Keep UI readable and accessible
+
+Avoid over-using animations for performance
+
+Example palette:
+
+Background: #050816 (very dark navy)
+
+Primary: #f97316 (pumpkin orange)
+
+Accent: #a855f7 (purple)
+
+Danger: #ef4444 (blood red)
+
+Text: #f9fafb (almost white)
+
+Secondary text: #9ca3af (muted gray)
+
+/.kiro/steering/user-experience.md
+
+UX principles:
+
+Minimize fear, maximize fun
+
+Feedback should motivate improvement
+
+Ghost elements should support understanding:
+
+ghost cursors show collaborators
+
+glowing code indicates AI attention
+
+8.3 Hooks
+
+/.kiro/hooks/auto-feedback.js
+Pseudo responsibility:
+
+Listen to submission.created event
+
+Call Kiro AI Judge agent with proper context
+
+Store returned feedback in DB
+
+Trigger notification to frontend via WebSocket
+
+/.kiro/hooks/collab-sync.js
+
+Defines how:
+
+code updates are broadcast
+
+positions and cursors are synced
+
+rooms are created and destroyed
+
+You don’t need actual JavaScript in the hook file for the write-up; you can document the logic and show some example code.
+
+8.4 MCP Tool
+
+/.kiro/mcp/problems-tool.json or .md
+
+Define an MCP tool that:
+
+Fetches a list of problems from a CP API or from your own DB
+
+Used by Kiro to suggest appropriate problems based on user level
+
+For hackathon:
+
+Implement it as:
+
+Real limited integration
+
+Or local DB wrapper
+
+Just explain clearly in your write-up.
+
+9. UI and Visual Design
+Color Palette (Halloween but professional)
+
+Background: #050816
+
+Surface: #0b1020
+
+Primary: #f97316
+
+Secondary: #a855f7
+
+Accent/Success: #22c55e
+
+Error: #ef4444
+
+Text main: #f9fafb
+
+Muted text: #9ca3af
+
+Typography
+
+Headings: something close to “Space Grotesk” or “Poppins”
+
+Body: “Inter”
+
+Code: “Fira Code” or “JetBrains Mono”
+
+Key UI Elements
+
+Landing Page
+
+Hero: “Summon your AI Code Mentor”
+
+Background: subtle fog/mist gradient
+
+Floating ghost icons around a code editor mockup
+
+CTA: “Start Mentoring Your Code”
+
+Dashboard
+
+Cards with:
+
+“Continue where you left off”
+
+XP and level meter (progress bar with eerie glow)
+
+Badges with Halloween icons
+
+Problem Page
+
+Left: Problem description on a slightly translucent card
+
+Right: Editor with subtle orange border glow
+
+Bottom-right: button “Summon AI Mentor” with ghost icon
+
+AI Feedback Panel
+
+Slide-in panel from left or bottom
+
+Header: “Mentor’s Verdict” with 1 to 5 ghost icons
+
+Sections:
+
+Summary
+
+Scores
+
+Suggestions
+
+Each suggestion bullet shows a mini animated dot or pulse
+
+Collaborative Cursor
+
+Each collaborator shown as:
+
+Ghost head icon
+
+Name label with orange glow
+
+Animations with Framer Motion
+
+Card hover: float gently upward
+
+Feedback panel: slide and fade-in
+
+Error detection: slight shake on code editor border
+
+10. 3-minute Demo Flow (For your video)
+
+Rough script:
+
+Intro (0:00–0:30)
+
+Who you are
+
+One-liner of CodeMentor AI
+
+Category: Frankenstein + Costume Contest
+
+User Flow (0:30–1:30)
+
+Login as a learner
+
+Show dashboard, badges, XP
+
+Navigate to problem list
+
+Open one problem
+
+Coding and AI Review (1:30–2:15)
+
+Write or paste a solution
+
+Hit “Summon AI Mentor”
+
+Show AI feedback panel:
+
+summary
+
+scores
+
+suggestions
+
+Show how feedback helps improve code
+
+Collaboration & Spooky UI (2:15–2:45)
+
+Open same room in another window (fake collaborator)
+
+Show ghost cursor
+
+Point out Halloween UI elements
+
+Kiro Usage + Closing (2:45–3:00)
+
+Briefly say:
+
+Used specs for architecture and judge behavior
+
+Used steering docs to shape mentor personality
+
+Used hooks for auto AI review and collaboration
+
+Used vibe coding to build UI and animations
+
+Used MCP (or MCP-ready structure) for problem sourcing
+
+End with: “This is CodeMentor AI, where your code fears no bug.”
+
+11. Submission Checklist
+
+ Public GitHub repo
+
+ OSI-approved license (MIT or Apache 2.0)
+
+ /.kiro directory with:
+
+specs
+
+hooks
+
+steering
+
+mcp
+
+ Live deployed app URL
+
+ Test credentials (if needed) in README
+
+ 3-minute public demo video link
+
+ Written explanation:
+
+what CodeMentor AI does
+
+how it uses Kiro (all 5 aspects)
+
+ Mention category: Frankenstein (+ Costume Contest as bonus)
