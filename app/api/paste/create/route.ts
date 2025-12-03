@@ -56,6 +56,10 @@ export async function POST(request: NextRequest) {
       expiresAt,
       maxViews: maxViews || undefined,
       viewCount: 0,
+      permissions: {
+        mode: 'view-only',
+        requireAuth: false,
+      },
       metadata: {
         ip,
         userAgent,

@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import Editor from "@monaco-editor/react";
+import PermissionsModal from "@/components/PermissionsModal";
 
 interface PasteData {
   shortId: string;
@@ -17,6 +18,13 @@ interface PasteData {
   viewsRemaining: number | null;
   timeRemaining: string;
   author?: string;
+  permissions?: {
+    mode: 'view-only' | 'edit' | 'edit-together';
+  };
+  collaborators?: Array<{
+    username: string;
+    lastActive: string;
+  }>;
   aiAnalysis?: {
     vulnerabilities: Array<{
       type: string;
@@ -41,6 +49,11 @@ export default function PasteViewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
+  const [showPermissions, setShowPermissions] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     const fetchPaste = async () => {
@@ -93,6 +106,88 @@ export default function PasteViewPage() {
     const blob = new Blob([paste?.content || ""], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
+  };
+
+  const handleEdit = () => {
+    if (paste?.permissions?.mode === 'view-only') {
+      alert("> ERROR: This paste is view-only");
+      return;
+    }
+    setIsEditing(true);
+    setEditedContent(paste?.content || "");
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const response = await fetch(`/api/paste/${params.shortId}/update`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          content: editedContent,
+          userId: "anonymous", // TODO: Get from auth
+          username: "Anonymous"
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPaste(prev => prev ? { ...prev, content: data.content, collaborators: data.collaborators } : null);
+        setIsEditing(false);
+      } else {
+        alert("> ERROR: Failed to save changes");
+      }
+    } catch (err) {
+      alert("> ERROR: Failed to save changes");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditorChange = (value: string | undefined) => {
+    if (value !== undefined) {
+      setEditedContent(value);
+      
+      // Auto-save for edit-together mode
+      if (paste?.permissions?.mode === 'edit-together') {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = setTimeout(async () => {
+          try {
+            await fetch(`/api/paste/${params.shortId}/update`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                content: value,
+                userId: "anonymous",
+                username: "Anonymous"
+              }),
+            });
+          } catch (err) {
+            console.error("Auto-save failed:", err);
+          }
+        }, 1000);
+      }
+    }
+  };
+
+  const getPermissionIcon = () => {
+    switch (paste?.permissions?.mode) {
+      case 'view-only': return '👁️';
+      case 'edit': return '✏️';
+      case 'edit-together': return '👥';
+      default: return '👁️';
+    }
+  };
+
+  const getPermissionLabel = () => {
+    switch (paste?.permissions?.mode) {
+      case 'view-only': return 'VIEW ONLY';
+      case 'edit': return 'EDIT';
+      case 'edit-together': return 'EDIT TOGETHER';
+      default: return 'VIEW ONLY';
+    }
   };
 
   if (loading) {
@@ -167,33 +262,71 @@ export default function PasteViewPage() {
               <span className="ml-4">
                 {paste?.language.toUpperCase()} • {paste?.visibility.toUpperCase()}
               </span>
+              <button
+                onClick={() => setShowPermissions(true)}
+                className="ml-4 px-3 py-1 border border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-xs"
+                title="Change permissions"
+              >
+                {getPermissionIcon()} {getPermissionLabel()}
+              </button>
             </div>
 
             <div className="flex gap-3">
-              <button
-                onClick={handleCopy}
-                className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
-              >
-                {copied ? "[COPIED!]" : "[COPY]"}
-              </button>
-              <button
-                onClick={handleRaw}
-                className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
-              >
-                [RAW]
-              </button>
-              <button
-                onClick={() => router.push("/paste/new")}
-                className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
-              >
-                [FORK]
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-4 py-2 border-2 border-error text-error hover:bg-error hover:text-black transition-all text-sm"
-              >
-                [DELETE]
-              </button>
+              {!isEditing ? (
+                <>
+                  <button
+                    onClick={handleCopy}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                  >
+                    {copied ? "[COPIED!]" : "[COPY]"}
+                  </button>
+                  <button
+                    onClick={handleRaw}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                  >
+                    [RAW]
+                  </button>
+                  {paste?.permissions?.mode !== 'view-only' && (
+                    <button
+                      onClick={handleEdit}
+                      className="px-4 py-2 border-2 border-terminal text-terminal hover:bg-terminal hover:text-black transition-all text-sm"
+                    >
+                      [EDIT]
+                    </button>
+                  )}
+                  <button
+                    onClick={() => router.push("/paste/new")}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                  >
+                    [FORK]
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="px-4 py-2 border-2 border-error text-error hover:bg-error hover:text-black transition-all text-sm"
+                  >
+                    [DELETE]
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSave}
+                    disabled={saving}
+                    className="px-4 py-2 border-2 border-terminal text-terminal hover:bg-terminal hover:text-black transition-all text-sm disabled:opacity-50"
+                  >
+                    {saving ? "[SAVING...]" : "[SAVE]"}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditedContent("");
+                    }}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                  >
+                    [CANCEL]
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
 
@@ -208,10 +341,11 @@ export default function PasteViewPage() {
               <Editor
                 height="100%"
                 language={paste?.language}
-                value={paste?.content}
+                value={isEditing ? editedContent : paste?.content}
+                onChange={isEditing ? handleEditorChange : undefined}
                 theme="vs-dark"
                 options={{
-                  readOnly: true,
+                  readOnly: !isEditing,
                   fontSize: 14,
                   fontFamily: "'JetBrains Mono', monospace",
                   minimap: { enabled: true },
@@ -221,6 +355,18 @@ export default function PasteViewPage() {
                 }}
               />
             </div>
+            
+            {/* Collaborators indicator */}
+            {paste?.collaborators && paste.collaborators.length > 0 && (
+              <div className="border-t-2 border-border-dim p-3 flex items-center gap-2 text-sm">
+                <span className="text-terminal-dim">Active collaborators:</span>
+                {paste.collaborators.map((collab, i) => (
+                  <span key={i} className="px-2 py-1 bg-terminal/20 text-terminal rounded">
+                    👤 {collab.username}
+                  </span>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* AI Analysis Panel */}
@@ -364,6 +510,20 @@ export default function PasteViewPage() {
           )}
         </div>
       </div>
+
+      {/* Permissions Modal */}
+      <PermissionsModal
+        isOpen={showPermissions}
+        onClose={() => setShowPermissions(false)}
+        currentMode={paste?.permissions?.mode || 'view-only'}
+        shortId={params.shortId as string}
+        onUpdate={(mode) => {
+          setPaste(prev => prev ? { 
+            ...prev, 
+            permissions: { mode: mode as 'view-only' | 'edit' | 'edit-together' }
+          } : null);
+        }}
+      />
     </div>
   );
 }

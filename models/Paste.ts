@@ -10,6 +10,16 @@ export interface IPaste extends Document {
   expiresAt?: Date;
   viewCount: number;
   maxViews?: number;
+  permissions: {
+    mode: 'view-only' | 'edit' | 'edit-together';
+    allowedUsers?: string[]; // userIds or emails
+    requireAuth?: boolean;
+  };
+  collaborators?: Array<{
+    userId: mongoose.Types.ObjectId;
+    username: string;
+    lastActive: Date;
+  }>;
   aiAnalysis?: {
     vulnerabilities: Array<{
       type: string;
@@ -70,6 +80,26 @@ const PasteSchema = new Schema<IPaste>({
   maxViews: {
     type: Number,
   },
+  permissions: {
+    mode: {
+      type: String,
+      enum: ['view-only', 'edit', 'edit-together'],
+      default: 'view-only',
+    },
+    allowedUsers: [String],
+    requireAuth: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  collaborators: [{
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    username: String,
+    lastActive: Date,
+  }],
   aiAnalysis: {
     vulnerabilities: [{
       type: {

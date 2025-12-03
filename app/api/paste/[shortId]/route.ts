@@ -63,6 +63,8 @@ export async function GET(
       timeRemaining,
       aiAnalysis: paste.aiAnalysis,
       author: paste.userId ? (paste.userId as any).username : 'Anonymous',
+      permissions: paste.permissions || { mode: 'view-only' },
+      collaborators: paste.collaborators || [],
     });
 
   } catch (error) {
