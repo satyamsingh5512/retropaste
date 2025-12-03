@@ -54,7 +54,7 @@ export default function PasteViewPage() {
   const [editedContent, setEditedContent] = useState("");
   const [showPermissions, setShowPermissions] = useState(false);
   const [saving, setSaving] = useState(false);
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchPaste = async () => {
