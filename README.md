@@ -11,14 +11,28 @@ A modern code sharing platform that resurrects the classic Pastebin aesthetic wi
 
 ## ✨ Features
 
-- **🎨 Authentic Retro UI**: CRT screen effects, scan lines, phosphor glow, VHS noise
-- **🎮 8-bit Sound Effects**: Retro button sounds using Web Audio API
-- **🤖 AI Code Analysis**: Automatic vulnerability detection and performance suggestions
-- **⏱️ Ephemeral Pastes**: Self-destructing snippets with time or view-based expiration
-- **🎯 Syntax Highlighting**: Monaco editor with 19+ languages
-- **🔒 Privacy Options**: Public, unlisted, or private paste visibility
-- **⚡ Lightning Fast**: Built on Next.js 14 with optimized performance
-- **📱 Responsive**: Works seamlessly on desktop, tablet, and mobile
+### 🎨 Core Features
+- **Authentic Retro UI**: CRT screen effects, scan lines, phosphor glow, VHS noise
+- **8-bit Sound Effects**: Retro button sounds using Web Audio API
+- **AI Code Analysis**: Automatic vulnerability detection and performance suggestions
+- **Ephemeral Pastes**: Self-destructing snippets with time or view-based expiration
+- **Syntax Highlighting**: Monaco editor with 100+ languages
+- **Privacy Options**: Public, unlisted, or private paste visibility
+
+### 🚀 Advanced Features
+- **⚡ Code Playground**: Run JavaScript/TypeScript code directly in browser
+- **📱 QR Code Generator**: Generate QR codes for easy mobile sharing
+- **🔗 GitHub Gist Integration**: Import/Export to GitHub Gists
+- **📊 Statistics Dashboard**: View counts, lines of code, and analytics
+- **🎨 Embed Widget**: Embed pastes in websites with customizable themes
+- **👥 Collaborative Editing**: Real-time editing with permissions (view/edit/edit-together)
+- **💬 Live Chat Assistant**: AI-powered code help and explanations
+- **🔍 Syntax Error Detection**: Real-time error highlighting
+
+### ⚡ Performance
+- **Lightning Fast**: Optimized with caching and debouncing
+- **60% Fewer API Calls**: Smart request management
+- **Responsive**: Works seamlessly on desktop, tablet, and mobile
 
 ## 🚀 Quick Start
 

@@ -10,6 +10,8 @@ import LiveChat from "@/components/LiveChat";
 import CodePlayground from "@/components/CodePlayground";
 import QRCodeModal from "@/components/QRCodeModal";
 import GistModal from "@/components/GistModal";
+import EmbedModal from "@/components/EmbedModal";
+import StatsPanel from "@/components/StatsPanel";
 
 interface PasteData {
   shortId: string;
@@ -59,6 +61,7 @@ export default function PasteViewPage() {
   const [saving, setSaving] = useState(false);
   const [showQRCode, setShowQRCode] = useState(false);
   const [showGist, setShowGist] = useState(false);
+  const [showEmbed, setShowEmbed] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -329,6 +332,13 @@ export default function PasteViewPage() {
                     [GIST]
                   </button>
                   <button
+                    onClick={() => setShowEmbed(true)}
+                    className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
+                    title="Embed Code"
+                  >
+                    [EMBED]
+                  </button>
+                  <button
                     onClick={() => router.push("/paste/new")}
                     className="px-4 py-2 border-2 border-terminal-dim text-terminal-dim hover:border-terminal hover:text-terminal transition-all text-sm"
                   >
@@ -363,6 +373,17 @@ export default function PasteViewPage() {
               )}
             </div>
           </motion.div>
+
+          {/* Statistics Panel */}
+          {paste && (
+            <StatsPanel
+              viewCount={paste.viewCount}
+              createdAt={paste.createdAt}
+              language={paste.language}
+              linesOfCode={paste.content.split('\n').length}
+              characters={paste.content.length}
+            />
+          )}
 
           {/* Code Playground */}
           {paste && !isEditing && (
@@ -588,6 +609,13 @@ export default function PasteViewPage() {
           language={paste.language}
         />
       )}
+
+      {/* Embed Modal */}
+      <EmbedModal
+        isOpen={showEmbed}
+        onClose={() => setShowEmbed(false)}
+        shortId={params.shortId as string}
+      />
     </div>
   );
 }
