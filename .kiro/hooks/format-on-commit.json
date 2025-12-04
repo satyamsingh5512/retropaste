@@ -1,0 +1,12 @@
+{
+  "name": "Format Code Before Commit",
+  "description": "Ensure code is properly formatted before committing",
+  "trigger": {
+    "type": "preCommit"
+  },
+  "action": {
+    "type": "command",
+    "command": "npm run lint"
+  },
+  "enabled": true
+}

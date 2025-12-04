@@ -1,0 +1,13 @@
+{
+  "name": "Run Tests on Save",
+  "description": "Automatically run TypeScript type checking when saving files",
+  "trigger": {
+    "type": "onSave",
+    "filePattern": "**/*.{ts,tsx}"
+  },
+  "action": {
+    "type": "command",
+    "command": "npm run type-check"
+  },
+  "enabled": true
+}
