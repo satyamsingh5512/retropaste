@@ -100,6 +100,66 @@ export default function AuthModal({ isOpen, onClose, mode, onSwitchMode }: AuthM
                   </div>
                 </div>
 
+                {/* Demo Credentials */}
+                {mode === "login" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mb-6 border-2 border-terminal bg-terminal/10 p-4 rounded"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="text-terminal text-sm font-bold">
+                        🎯 DEMO CREDENTIALS
+                      </div>
+                      <div className="text-terminal-dim text-xs">
+                        For Judges/Testing
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between bg-black/50 p-2 rounded">
+                        <div className="text-terminal text-xs font-mono">
+                          demo@retropaste.dev
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEmail("demo@retropaste.dev");
+                            navigator.clipboard.writeText("demo@retropaste.dev");
+                          }}
+                          className="text-terminal hover:text-retro text-xs px-2 py-1 border border-terminal-dim hover:border-terminal transition-all"
+                        >
+                          [COPY]
+                        </button>
+                      </div>
+                      <div className="flex items-center justify-between bg-black/50 p-2 rounded">
+                        <div className="text-terminal text-xs font-mono">
+                          demo123456
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPassword("demo123456");
+                            navigator.clipboard.writeText("demo123456");
+                          }}
+                          className="text-terminal hover:text-retro text-xs px-2 py-1 border border-terminal-dim hover:border-terminal transition-all"
+                        >
+                          [COPY]
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEmail("demo@retropaste.dev");
+                          setPassword("demo123456");
+                        }}
+                        className="w-full text-terminal hover:text-retro text-xs py-2 border border-terminal-dim hover:border-terminal transition-all mt-2"
+                      >
+                        [AUTO-FILL DEMO CREDENTIALS]
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Username (signup only) */}

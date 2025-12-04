@@ -24,6 +24,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "seed:demo": "tsx scripts/seed-demo-user.ts",
     "setup": "echo '\n🚀 RetroPaste Setup\n\n⚠️  IMPORTANT: You need MongoDB running!\n\nQuick setup options:\n1. MongoDB Atlas (free): https://www.mongodb.com/cloud/atlas\n2. Docker: docker run -d -p 27017:27017 mongo\n\nSee SETUP.md for detailed instructions.\n'"
   },
   "dependencies": {

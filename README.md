@@ -34,6 +34,19 @@ A modern code sharing platform that resurrects the classic Pastebin aesthetic wi
 - **60% Fewer API Calls**: Smart request management
 - **Responsive**: Works seamlessly on desktop, tablet, and mobile
 
+## 🎯 Demo Credentials (For Judges)
+
+**Try it now without registration!**
+
+```
+Email:    demo@retropaste.dev
+Password: demo123456
+```
+
+Click "SIGN IN" on the homepage and use the **[AUTO-FILL DEMO CREDENTIALS]** button for instant access!
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
